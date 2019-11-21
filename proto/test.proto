@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package calendar;
+
+option go_package = "proto";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+service CalendarService {
+    rpc NewEvent(NewEventRequest) returns (NewEventResponse);
+    rpc ModifyEvent(ModifyEventRequest) returns (ModifyEventResponse);
+    rpc RemoveEvent(RemoveEventRequest) returns (RemoveEventResponse);
+    rpc GetEvent(GetEventRequest) returns (GetEventResponse);
+}
+
+message Event {
+    string title = 1;
+    string description = 2;
+    google.protobuf.Timestamp start = 3;
+    google.protobuf.Duration duration = 4;
+}
+
+message NewEventRequest {
+    Event event = 1;
+}
+
+message NewEventResponse {
+    string id = 1;
+}
+
+message ModifyEventRequest {
+    string id = 1;
+    Event event = 2;
+}
+
+message ModifyEventResponse {
+    string error = 1;
+}
+
+message RemoveEventRequest {
+    string id = 1;
+}
+
+message RemoveEventResponse {
+    bool ok = 1;
+}
+
+message GetEventRequest {
+    string id = 1;
+}
+
+message GetEventResponse {
+    Event event = 1;
+    bool ok = 2;
+}

@@ -12,7 +12,7 @@ import (
 )
 
 type Calendar struct {
-	events map[uuid.UUID]*Event
+	events map[string]*Event
 	mutex  *sync.Mutex
 	logger *zap.Logger
 }
@@ -27,15 +27,15 @@ type Event struct {
 func NewCalendar(logger *zap.Logger) *Calendar {
 	c := &Calendar{
 		mutex:  &sync.Mutex{},
-		events: make(map[uuid.UUID]*Event),
+		events: make(map[string]*Event),
 		logger: logger,
 	}
 	c.logger.Info("Calendar is creating...")
 	return c
 }
 
-func (c *Calendar) NewEvent(title, description string, start time.Time, duration time.Duration) uuid.UUID {
-	id := uuid.New()
+func (c *Calendar) NewEvent(title, description string, start time.Time, duration time.Duration) string {
+	id := uuid.New().String()
 	c.mutex.Lock()
 	c.events[id] = &Event{
 		Title:       title,
@@ -59,7 +59,7 @@ func (c *Calendar) String() string {
 	return result
 }
 
-func (c *Calendar) GetEvent(id uuid.UUID) (Event, error) {
+func (c *Calendar) GetEvent(id string) (Event, error) {
 	if val, ok := c.events[id]; !ok {
 		return Event{}, errors.New("Not event in database")
 	} else {
@@ -67,7 +67,7 @@ func (c *Calendar) GetEvent(id uuid.UUID) (Event, error) {
 	}
 }
 
-func (c *Calendar) ModifyEvent(id uuid.UUID, e Event) error {
+func (c *Calendar) ModifyEvent(id string, e Event) error {
 	if _, ok := c.events[id]; !ok {
 		return errors.New("Not event in database")
 	} else {
@@ -82,7 +82,7 @@ func (c *Calendar) ModifyEvent(id uuid.UUID, e Event) error {
 	}
 }
 
-func (c *Calendar) RemoveEvent(id uuid.UUID) error {
+func (c *Calendar) RemoveEvent(id string) error {
 	if _, ok := c.events[id]; !ok {
 		return errors.New("Not event in database")
 	} else {
