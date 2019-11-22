@@ -2,7 +2,7 @@ package calendar
 
 import (
 	"fmt"
-	"otus22/internal/sql"
+	"otus25/internal/sql"
 	"time"
 )
 

@@ -3,10 +3,10 @@ package main
 import (
 	"net"
 
-	"github.com/JeanLouiseFinch/otus22/calendar"
-	"github.com/JeanLouiseFinch/otus22/config"
-	"github.com/JeanLouiseFinch/otus22/log"
-	"github.com/JeanLouiseFinch/otus22/proto"
+	"otus25/calendar"
+	"otus25/config"
+	"otus25/log"
+	"otus25/proto"
 
 	"go.uber.org/zap"
 

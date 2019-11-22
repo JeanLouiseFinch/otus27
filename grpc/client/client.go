@@ -6,7 +6,7 @@ import (
 
 	"time"
 
-	"otus22/proto"
+	"otus25/proto"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -15,6 +15,37 @@ import (
 	"google.golang.org/grpc"
 )
 
+func newEvent(c proto.CalendarServiceClient, title, descr string, start, end time.Time) error {
+	event := proto.Event{}
+	event.Title = title
+	event.Description = descr
+	start2, err := ptypes.TimestampProto(start)
+	if err != nil {
+		return err
+	}
+	event.Start = start2
+	end2, err := ptypes.TimestampProto(end)
+	if err != nil {
+		return err
+	}
+	event.End = end2
+	ctx, cancel := context.WithTimeout(context.Background(), 400*time.Millisecond)
+	defer cancel()
+	_, err = c.NewEvent(ctx, &proto.NewEventRequest{Event: &event})
+	if err != nil {
+		statusErr, ok := status.FromError(err)
+		if ok {
+			if statusErr.Code() == codes.DeadlineExceeded {
+				return fmt.Errorf("Deadline exceeded! %v", err)
+			} else {
+				return fmt.Errorf("undexpected error %s\n", statusErr.Message())
+			}
+		} else {
+			return fmt.Errorf("Error while calling RPC NewEvent: %v", err)
+		}
+	}
+	return nil
+}
 func main() {
 
 	cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
@@ -24,124 +55,32 @@ func main() {
 	defer cc.Close()
 
 	c := proto.NewCalendarServiceClient(cc)
-	ctx, cancel := context.WithTimeout(context.Background(), 400*time.Millisecond)
-	defer cancel()
-	fmt.Printf("Insert:%s\n", "title 1")
-	event1 := proto.Event{}
-	event1.Title = "title 1"
-	event1.Description = "description 1"
-	event1.Start = ptypes.TimestampNow()
-	event1.End = ptypes.TimestampNow()
-	ev, err := c.NewEvent(ctx, &proto.NewEventRequest{Event: &event1})
+	err = newEvent(c, "rmq1", "rmq1 descr", time.Now().Add(1*time.Minute), time.Now().Add(3*time.Minute))
 	if err != nil {
-		statusErr, ok := status.FromError(err)
-		if ok {
-			if statusErr.Code() == codes.DeadlineExceeded {
-				fmt.Println("Deadline exceeded!")
-			} else {
-				fmt.Printf("undexpected error %s\n", statusErr.Message())
-			}
-		} else {
-			fmt.Printf("Error while calling RPC CheckHomework: %v", err)
-		}
-	} else {
-		fmt.Println(ev.GetId())
+		fmt.Println(err)
 	}
-	fmt.Printf("Insert:%s\n", "title 2")
-	event2 := proto.Event{}
-	event2.Title = "title 2"
-	event2.Description = "description 2"
-	event2.Start = ptypes.TimestampNow()
-	event2.End = ptypes.TimestampNow()
-	ev, err = c.NewEvent(ctx, &proto.NewEventRequest{Event: &event2})
+	err = newEvent(c, "rmq2", "rmq2 descr", time.Now().Add(2*time.Minute), time.Now().Add(3*time.Minute))
 	if err != nil {
-		statusErr, ok := status.FromError(err)
-		if ok {
-			if statusErr.Code() == codes.DeadlineExceeded {
-				fmt.Println("Deadline exceeded!")
-			} else {
-				fmt.Printf("undexpected error %s\n", statusErr.Message())
-			}
-		} else {
-			fmt.Printf("Error while calling RPC CheckHomework: %v", err)
-		}
-	} else {
-		fmt.Println(ev.GetId())
+		fmt.Println(err)
 	}
-	fmt.Printf("Insert:%s\n", "title 3")
-	event3 := proto.Event{}
-	event3.Title = "title 3"
-	event3.Description = "description 3"
-	event3.Start = ptypes.TimestampNow()
-	event3.End = ptypes.TimestampNow()
-	ev, err = c.NewEvent(ctx, &proto.NewEventRequest{Event: &event3})
+	err = newEvent(c, "rmq3", "rmq3 descr", time.Now().Add(2*time.Minute), time.Now().Add(3*time.Minute))
 	if err != nil {
-		statusErr, ok := status.FromError(err)
-		if ok {
-			if statusErr.Code() == codes.DeadlineExceeded {
-				fmt.Println("Deadline exceeded!")
-			} else {
-				fmt.Printf("undexpected error %s\n", statusErr.Message())
-			}
-		} else {
-			fmt.Printf("Error while calling RPC CheckHomework: %v", err)
-		}
-	} else {
-		fmt.Println(ev.GetId())
-		fmt.Println("end insert")
+		fmt.Println(err)
 	}
-
-	resp, err := c.GetEvent(ctx, &proto.GetEventRequest{Id: ev.GetId()})
+	err = newEvent(c, "rmq4", "rmq4 descr", time.Now().Add(5*time.Minute), time.Now().Add(14*time.Minute))
 	if err != nil {
-		statusErr, ok := status.FromError(err)
-		if ok {
-			if statusErr.Code() == codes.DeadlineExceeded {
-				fmt.Println("Deadline exceeded!")
-			} else {
-				fmt.Printf("undexpected error %s\n", statusErr.Message())
-			}
-		} else {
-			fmt.Printf("Error while calling RPC CheckHomework: %v", err)
-		}
-	} else {
-		fmt.Printf("get %s by id %s\n", resp.GetEvent().GetTitle(), ev.GetId())
+		fmt.Println(err)
 	}
-	tt, _ := ptypes.TimestampProto(time.Now())
-	_, err = c.ModifyEvent(ctx, &proto.ModifyEventRequest{Id: ev.GetId(), Event: &proto.Event{
-		Title:       "title 3 modify",
-		End:         tt,
-		Start:       tt,
-		Description: "descr 3 modify",
-	}})
-
-	resp, err = c.GetEvent(ctx, &proto.GetEventRequest{Id: ev.GetId()})
+	err = newEvent(c, "rmq5", "rmq5 descr", time.Now().Add(6*time.Minute), time.Now().Add(7*time.Minute))
 	if err != nil {
-		statusErr, ok := status.FromError(err)
-		if ok {
-			if statusErr.Code() == codes.DeadlineExceeded {
-				fmt.Println("Deadline exceeded!")
-			} else {
-				fmt.Printf("undexpected error %s\n", statusErr.Message())
-			}
-		} else {
-			fmt.Printf("Error while calling RPC CheckHomework: %v", err)
-		}
-	} else {
-		fmt.Printf("get %s by id %s\n", resp.GetEvent().GetTitle(), ev.GetId())
+		fmt.Println(err)
 	}
-	_, err = c.RemoveEvent(ctx, &proto.RemoveEventRequest{Id: ev.GetId()})
+	err = newEvent(c, "rmq6", "rmq6 descr", time.Now().Add(8*time.Minute), time.Now().Add(10*time.Minute))
 	if err != nil {
-		statusErr, ok := status.FromError(err)
-		if ok {
-			if statusErr.Code() == codes.DeadlineExceeded {
-				fmt.Println("Deadline exceeded!")
-			} else {
-				fmt.Printf("undexpected error %s\n", statusErr.Message())
-			}
-		} else {
-			fmt.Printf("Error while calling RPC CheckHomework: %v", err)
-		}
-	} else {
-
+		fmt.Println(err)
+	}
+	err = newEvent(c, "rmq7", "rmq7 descr", time.Now().Add(10*time.Minute), time.Now().Add(12*time.Minute))
+	if err != nil {
+		fmt.Println(err)
 	}
 }

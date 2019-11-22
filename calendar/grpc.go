@@ -5,7 +5,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/JeanLouiseFinch/otus22/proto"
+	"otus25/proto"
 
 	"github.com/golang/protobuf/ptypes"
 )

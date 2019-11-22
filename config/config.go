@@ -23,10 +23,16 @@ func GetConfig(filename string) (*Config, error) {
 		err    error
 		loader *confita.Loader
 	)
-	loader = confita.NewLoader(
-		file.NewBackend(filename),
-		env.NewBackend(),
-	)
+	if filename == "" {
+		loader = confita.NewLoader(
+			env.NewBackend(),
+		)
+	} else {
+		loader = confita.NewLoader(
+			file.NewBackend(filename),
+			env.NewBackend(),
+		)
+	}
 	c = Config{}
 	err = loader.Load(context.Background(), &c)
 	if err != nil {

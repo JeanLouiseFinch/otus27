@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/JeanLouiseFinch/otus22/config"
+	"otus25/config"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -104,4 +104,33 @@ func RemoveEvent(id string) error {
 	defer cancel()
 	_, err = db.ExecContext(ctx, "DELETE FROM events WHERE id=$1", id)
 	return err
+}
+
+func GetEventsByTime(duration time.Duration) ([]Event, error) {
+	var (
+		err    error
+		events []Event
+	)
+	db, err := connect()
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	t1 := time.Now()
+	t2 := t1.Add(duration)
+	results, err := db.QueryContext(ctx, "SELECT title,descr,start_time,end_time FROM events WHERE start_time BETWEEN $1 AND $2", t1, t2)
+	if err != nil {
+		return nil, err
+	}
+	events = make([]Event, 0)
+	for results.Next() {
+		ev := Event{}
+		err = results.Scan(&ev.Title, &ev.Description, &ev.Start, &ev.End)
+		if err != nil {
+			continue
+		}
+		events = append(events, ev)
+	}
+	return events, err
 }
