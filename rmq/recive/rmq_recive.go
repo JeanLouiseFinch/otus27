@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"otus25/config"
-	"otus25/log"
+
+	"github.com/JeanLouiseFinch/otus25/config"
+	"github.com/JeanLouiseFinch/otus25/log"
 
 	"github.com/streadway/amqp"
 	"go.uber.org/zap"

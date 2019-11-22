@@ -2,8 +2,9 @@ package calendar
 
 import (
 	"fmt"
-	"otus25/internal/sql"
 	"time"
+
+	"github.com/JeanLouiseFinch/otus25/internal/sql"
 )
 
 type Calendar struct {

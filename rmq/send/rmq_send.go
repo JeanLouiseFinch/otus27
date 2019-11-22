@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"otus25/config"
-	"otus25/internal/sql"
-	"otus25/log"
 	"time"
+
+	"github.com/JeanLouiseFinch/otus25/config"
+	"github.com/JeanLouiseFinch/otus25/internal/sql"
+	"github.com/JeanLouiseFinch/otus25/log"
 
 	"go.uber.org/zap"
 

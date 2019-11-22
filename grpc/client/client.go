@@ -6,7 +6,7 @@ import (
 
 	"time"
 
-	"otus25/proto"
+	"github.com/JeanLouiseFinch/otus25/proto"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

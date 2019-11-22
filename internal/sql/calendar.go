@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"otus25/config"
+	"github.com/JeanLouiseFinch/otus25/config"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
