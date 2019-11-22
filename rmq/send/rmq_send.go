@@ -1,12 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/JeanLouiseFinch/otus25/config"
-	"github.com/JeanLouiseFinch/otus25/log"
-	"github.com/JeanLouiseFinch/otus25/sql"
+	"otus25/config"
+	"otus25/log"
+	"otus25/sql"
 
 	"go.uber.org/zap"
 
@@ -49,7 +50,9 @@ func main() {
 	}
 	msg := ""
 	for {
-		events, err := sql.GetEventsByTime(5 * time.Minute)
+		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+		defer cancel()
+		events, err := sql.GetEventsByTime(ctx, 5*time.Minute)
 		if err != nil {
 			l.Error("Failed to get events", zap.Error(err))
 			continue

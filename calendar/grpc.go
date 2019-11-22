@@ -5,7 +5,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/JeanLouiseFinch/otus25/proto"
+	"otus25/proto"
 
 	"github.com/golang/protobuf/ptypes"
 )
@@ -21,7 +21,7 @@ func NewServerCalendar(calendar *Calendar, logger *zap.Logger) *ServerCalendar {
 		logger:   logger,
 	}
 }
-func (c *ServerCalendar) NewEvent(context context.Context, in *proto.NewEventRequest) (*proto.NewEventResponse, error) {
+func (c *ServerCalendar) NewEvent(ctx context.Context, in *proto.NewEventRequest) (*proto.NewEventResponse, error) {
 	var err error
 	event := &Event{}
 	event.Description = in.GetEvent().GetDescription()
@@ -37,7 +37,7 @@ func (c *ServerCalendar) NewEvent(context context.Context, in *proto.NewEventReq
 		return nil, err
 	}
 	c.logger.Info("Inserting event ", zap.String("title", event.Title))
-	uuid, err := c.calendar.NewEvent(event.Title, event.Description, event.Start, event.End)
+	uuid, err := c.calendar.NewEvent(ctx, event.Title, event.Description, event.Start, event.End)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (c *ServerCalendar) ModifyEvent(ctx context.Context, in *proto.ModifyEventR
 		return nil, err
 	}
 	c.logger.Info("Modify event ", zap.String("title", event.Title))
-	err = c.calendar.ModifyEvent(id, event)
+	err = c.calendar.ModifyEvent(ctx, id, event)
 	return &proto.ModifyEventResponse{}, err
 }
 func (c *ServerCalendar) RemoveEvent(ctx context.Context, in *proto.RemoveEventRequest) (*proto.RemoveEventResponse, error) {
@@ -73,7 +73,7 @@ func (c *ServerCalendar) RemoveEvent(ctx context.Context, in *proto.RemoveEventR
 		id  string
 	)
 	id = in.GetId()
-	err = c.calendar.RemoveEvent(id)
+	err = c.calendar.RemoveEvent(ctx, id)
 	if err != nil {
 		return &proto.RemoveEventResponse{Ok: false}, err
 	}
@@ -89,7 +89,7 @@ func (c *ServerCalendar) GetEvent(ctx context.Context, in *proto.GetEventRequest
 	)
 	id = in.GetId()
 	c.logger.Info("Get event ", zap.String("id", id))
-	event, err = c.calendar.GetEvent(id)
+	event, err = c.calendar.GetEvent(ctx, id)
 	if err != nil {
 		return &proto.GetEventResponse{Ok: false}, err
 	}

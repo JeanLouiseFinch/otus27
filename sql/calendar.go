@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/JeanLouiseFinch/otus25/config"
+	"otus25/config"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -33,15 +33,12 @@ func connect() (*sqlx.DB, error) {
 	return db, nil
 }
 
-func NewEvent(calendar_id int, title, description string, start, end time.Time) (string, error) {
-	var err error
+func NewEvent(ctx context.Context, calendar_id int, title, description string, start, end time.Time) (string, error) {
 	var id uuid.UUID
 	db, err := connect()
 	if err != nil {
 		return "", err
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-	defer cancel()
 	err = db.QueryRowContext(ctx, "INSERT INTO events (id,calendar_id,title,descr,start_time,end_time) VALUES($1,$2,$3,$4,$5,$6) RETURNING id", uuid.New(), calendar_id, title, description, start, end).Scan(&id)
 	return id.String(), err
 }
@@ -51,9 +48,7 @@ func GetAllEvents(calendar_id int) ([]Event, error) {
 	if err != nil {
 		return nil, err
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-	defer cancel()
-	rows, err := db.QueryContext(ctx, "SELECT title,descr,start_time,end_time FROM events WHERE calendar_id=$1", calendar_id)
+	rows, err := db.Query("SELECT title,descr,start_time,end_time FROM events WHERE calendar_id=$1", calendar_id)
 	if err != nil {
 		return nil, err
 	}
@@ -69,44 +64,35 @@ func GetAllEvents(calendar_id int) ([]Event, error) {
 	return result, nil
 }
 
-func GetEvent(id string) (*Event, error) {
-	var err error
+func GetEvent(ctx context.Context, id string) (*Event, error) {
 	result := Event{}
 	db, err := connect()
 	if err != nil {
 		return nil, err
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-	defer cancel()
 	err = db.QueryRowContext(ctx, "SELECT title,descr,start_time,end_time FROM events WHERE id=$1", id).Scan(&result.Title, &result.Description, &result.Start, &result.End)
 	return &result, err
 }
 
-func ModifyEvent(id string, title, description string, start, end time.Time) (*Event, error) {
-	var err error
+func ModifyEvent(ctx context.Context, id string, title, description string, start, end time.Time) (*Event, error) {
 	result := &Event{}
 	db, err := connect()
 	if err != nil {
 		return nil, err
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-	defer cancel()
 	err = db.QueryRowContext(ctx, "UPDATE events SET title=$1,descr=$2,start_time=$3,end_time=$4 WHERE id=$5 RETURNING title,descr,start_time,end_time", title, description, start, end, id).Scan(result.Title, result.Description, result.Start, result.End)
 	return result, err
 }
-func RemoveEvent(id string) error {
-	var err error
+func RemoveEvent(ctx context.Context, id string) error {
 	db, err := connect()
 	if err != nil {
 		return err
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-	defer cancel()
 	_, err = db.ExecContext(ctx, "DELETE FROM events WHERE id=$1", id)
 	return err
 }
 
-func GetEventsByTime(duration time.Duration) ([]Event, error) {
+func GetEventsByTime(ctx context.Context, duration time.Duration) ([]Event, error) {
 	var (
 		err    error
 		events []Event
@@ -115,8 +101,6 @@ func GetEventsByTime(duration time.Duration) ([]Event, error) {
 	if err != nil {
 		return nil, err
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-	defer cancel()
 	t1 := time.Now()
 	t2 := t1.Add(duration)
 	results, err := db.QueryContext(ctx, "SELECT title,descr,start_time,end_time FROM events WHERE start_time BETWEEN $1 AND $2", t1, t2)

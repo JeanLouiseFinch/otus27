@@ -1,10 +1,11 @@
 package calendar
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/JeanLouiseFinch/otus25/sql"
+	"otus25/sql"
 )
 
 type Calendar struct {
@@ -23,8 +24,8 @@ func NewCalendar() *Calendar {
 	return c
 }
 
-func (c *Calendar) NewEvent(title, description string, start time.Time, end time.Time) (string, error) {
-	result, err := sql.NewEvent(c.ID, title, description, start, end)
+func (c *Calendar) NewEvent(ctx context.Context, title, description string, start time.Time, end time.Time) (string, error) {
+	result, err := sql.NewEvent(ctx, c.ID, title, description, start, end)
 	return result, err
 }
 func (c *Calendar) String() string {
@@ -41,8 +42,8 @@ func (c *Calendar) String() string {
 	return result
 }
 
-func (c *Calendar) GetEvent(id string) (Event, error) {
-	result, err := sql.GetEvent(id)
+func (c *Calendar) GetEvent(ctx context.Context, id string) (Event, error) {
+	result, err := sql.GetEvent(ctx, id)
 	if err != nil {
 		return Event{}, err
 	}
@@ -55,11 +56,11 @@ func (c *Calendar) GetEvent(id string) (Event, error) {
 	return ev, nil
 }
 
-func (c *Calendar) ModifyEvent(id string, e Event) error {
-	_, err := sql.ModifyEvent(id, e.Title, e.Description, e.Start, e.End)
+func (c *Calendar) ModifyEvent(ctx context.Context, id string, e Event) error {
+	_, err := sql.ModifyEvent(ctx, id, e.Title, e.Description, e.Start, e.End)
 	return err
 }
 
-func (c *Calendar) RemoveEvent(id string) error {
-	return sql.RemoveEvent(id)
+func (c *Calendar) RemoveEvent(ctx context.Context, id string) error {
+	return sql.RemoveEvent(ctx, id)
 }
