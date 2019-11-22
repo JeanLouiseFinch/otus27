@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"otus25/config"
-	"otus25/log"
-	"otus25/sql"
+	"github.com/JeanLouiseFinch/otus25/config"
+	"github.com/JeanLouiseFinch/otus25/log"
+	"github.com/JeanLouiseFinch/otus25/sql"
 
 	"go.uber.org/zap"
 
