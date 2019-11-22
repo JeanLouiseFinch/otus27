@@ -6,7 +6,7 @@ import (
 
 	"time"
 
-	"github.com/JeanLouiseFinch/otus21/proto"
+	"otus22/proto"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -26,12 +26,12 @@ func main() {
 	c := proto.NewCalendarServiceClient(cc)
 	ctx, cancel := context.WithTimeout(context.Background(), 400*time.Millisecond)
 	defer cancel()
-
+	fmt.Printf("Insert:%s\n", "title 1")
 	event1 := proto.Event{}
 	event1.Title = "title 1"
 	event1.Description = "description 1"
 	event1.Start = ptypes.TimestampNow()
-	event1.Duration = ptypes.DurationProto(55617)
+	event1.End = ptypes.TimestampNow()
 	ev, err := c.NewEvent(ctx, &proto.NewEventRequest{Event: &event1})
 	if err != nil {
 		statusErr, ok := status.FromError(err)
@@ -47,12 +47,12 @@ func main() {
 	} else {
 		fmt.Println(ev.GetId())
 	}
-	fmt.Println(ev.GetId())
+	fmt.Printf("Insert:%s\n", "title 2")
 	event2 := proto.Event{}
-	event2.Title = "title 1"
-	event2.Description = "description 1"
+	event2.Title = "title 2"
+	event2.Description = "description 2"
 	event2.Start = ptypes.TimestampNow()
-	event2.Duration = ptypes.DurationProto(5126)
+	event2.End = ptypes.TimestampNow()
 	ev, err = c.NewEvent(ctx, &proto.NewEventRequest{Event: &event2})
 	if err != nil {
 		statusErr, ok := status.FromError(err)
@@ -68,12 +68,12 @@ func main() {
 	} else {
 		fmt.Println(ev.GetId())
 	}
-	fmt.Println(ev.GetId())
+	fmt.Printf("Insert:%s\n", "title 3")
 	event3 := proto.Event{}
 	event3.Title = "title 3"
 	event3.Description = "description 3"
 	event3.Start = ptypes.TimestampNow()
-	event3.Duration = ptypes.DurationProto(11617)
+	event3.End = ptypes.TimestampNow()
 	ev, err = c.NewEvent(ctx, &proto.NewEventRequest{Event: &event3})
 	if err != nil {
 		statusErr, ok := status.FromError(err)
@@ -88,7 +88,9 @@ func main() {
 		}
 	} else {
 		fmt.Println(ev.GetId())
+		fmt.Println("end insert")
 	}
+
 	resp, err := c.GetEvent(ctx, &proto.GetEventRequest{Id: ev.GetId()})
 	if err != nil {
 		statusErr, ok := status.FromError(err)
@@ -104,8 +106,12 @@ func main() {
 	} else {
 		fmt.Printf("get %s by id %s\n", resp.GetEvent().GetTitle(), ev.GetId())
 	}
+	tt, _ := ptypes.TimestampProto(time.Now())
 	_, err = c.ModifyEvent(ctx, &proto.ModifyEventRequest{Id: ev.GetId(), Event: &proto.Event{
-		Title: "title 2 modify",
+		Title:       "title 3 modify",
+		End:         tt,
+		Start:       tt,
+		Description: "descr 3 modify",
 	}})
 
 	resp, err = c.GetEvent(ctx, &proto.GetEventRequest{Id: ev.GetId()})

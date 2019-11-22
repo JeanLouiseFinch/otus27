@@ -5,7 +5,7 @@ package calendar;
 option go_package = "proto";
 
 import "google/protobuf/timestamp.proto";
-import "google/protobuf/duration.proto";
+// import "google/protobuf/duration.proto";
 
 service CalendarService {
     rpc NewEvent(NewEventRequest) returns (NewEventResponse);
@@ -18,7 +18,7 @@ message Event {
     string title = 1;
     string description = 2;
     google.protobuf.Timestamp start = 3;
-    google.protobuf.Duration duration = 4;
+    google.protobuf.Timestamp end = 4;
 }
 
 message NewEventRequest {

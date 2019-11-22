@@ -4,26 +4,33 @@ import (
 	"context"
 
 	"github.com/heetch/confita"
+	"github.com/heetch/confita/backend/env"
 	"github.com/heetch/confita/backend/file"
 )
 
 type Config struct {
-	TypeLog string
+	TypeLog  string `config:"typelog"`
+	Host     string `config:"host"`
+	Port     string `config:"port"`
+	User     string `config:"user"`
+	Password string `config:"password"`
+	DBName   string `config:"dbname"`
 }
 
-func GetConfig() (*Config, error) {
+func GetConfig(filename string) (*Config, error) {
 	var (
-		c      *Config
+		c      Config
 		err    error
 		loader *confita.Loader
 	)
 	loader = confita.NewLoader(
-		file.NewBackend("confita.yaml"),
+		file.NewBackend(filename),
+		env.NewBackend(),
 	)
-	c = &Config{}
-	err = loader.Load(context.Background(), c)
+	c = Config{}
+	err = loader.Load(context.Background(), &c)
 	if err != nil {
 		panic(err)
 	}
-	return c, err
+	return &c, err
 }
