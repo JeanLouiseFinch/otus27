@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/JeanLouiseFinch/otus25/config"
-	"github.com/JeanLouiseFinch/otus25/internal/sql"
 	"github.com/JeanLouiseFinch/otus25/log"
+	"github.com/JeanLouiseFinch/otus25/sql"
 
 	"go.uber.org/zap"
 

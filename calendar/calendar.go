@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/JeanLouiseFinch/otus25/internal/sql"
+	"github.com/JeanLouiseFinch/otus25/sql"
 )
 
 type Calendar struct {
