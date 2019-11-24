@@ -1,11 +1,11 @@
-package calendar
+package model
 
 import (
 	"context"
 
 	"go.uber.org/zap"
 
-	"github.com/JeanLouiseFinch/otus25/proto"
+	"github.com/JeanLouiseFinch/otus27/api/proto"
 
 	"github.com/golang/protobuf/ptypes"
 )

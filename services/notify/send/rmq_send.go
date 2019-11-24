@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
-	"github.com/JeanLouiseFinch/otus25/config"
-	"github.com/JeanLouiseFinch/otus25/log"
-	"github.com/JeanLouiseFinch/otus25/sql"
+	"github.com/JeanLouiseFinch/otus27/api/config"
+	"github.com/JeanLouiseFinch/otus27/api/log"
+	"github.com/JeanLouiseFinch/otus27/api/model"
 
 	"go.uber.org/zap"
 
@@ -15,16 +16,24 @@ import (
 )
 
 func main() {
-	cfg, err := config.GetConfig("")
+	var (
+		cfg *config.Config
+		err error
+	)
+	if len(os.Args) > 1 {
+		cfg, err = config.GetConfig(os.Args[1])
+	} else {
+		cfg, err = config.GetConfig("")
+	}
 	if err != nil {
 		panic(err)
 	}
-	l, err := log.GetLogger(cfg.TypeLog)
+	l, err := log.GetLogger(cfg.Log.TypeLog)
 	if err != nil {
 		panic(err)
 	}
 
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s/", cfg.RMQ.UserRMQ, cfg.RMQ.PasswordRMQ, cfg.RMQ.HostRMQ, cfg.RMQ.PortRMQ))
 	if err != nil {
 		l.Fatal("Failed to connect to RabbitMQ", zap.Error(err))
 	}
@@ -38,21 +47,25 @@ func main() {
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
-		"events", // name
-		false,    // durable
-		false,    // delete when unused
-		false,    // exclusive
-		false,    // no-wait
-		nil,      // arguments
+		cfg.RMQ.QueueRMQ, // name
+		false,            // durable
+		false,            // delete when unused
+		false,            // exclusive
+		false,            // no-wait
+		nil,              // arguments
 	)
 	if err != nil {
 		l.Fatal("Failed to declare a queue", zap.Error(err))
 	}
 	msg := ""
+	calendar, err := model.NewCalendar()
+	if err != nil {
+		l.Fatal("Failed to create a calendar", zap.Error(err))
+	}
 	for {
 		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 		defer cancel()
-		events, err := sql.GetEventsByTime(ctx, 5*time.Minute)
+		events, err := calendar.GetEventsByTime(ctx, time.Duration(cfg.RMQ.DurationRMQ)*time.Minute)
 		if err != nil {
 			l.Error("Failed to get events", zap.Error(err))
 			continue
@@ -74,7 +87,7 @@ func main() {
 				l.Info("Send", zap.String("event", val.Title))
 			}
 		}
-		l.Info("Sleeping 1 minute")
-		<-time.After(time.Minute * 1)
+		l.Info("Sleeping", zap.Int("minute", cfg.RMQ.TimeoutRMQ))
+		<-time.After(time.Minute * time.Duration(cfg.RMQ.TimeoutRMQ))
 	}
 }
