@@ -1,0 +1,8 @@
+FROM golang:stretch
+LABEL maintainer="Sergey A"
+WORKDIR /app
+COPY services/grpc/server/go.mod services/grpc/server/go.sum ./
+RUN go mod download
+COPY . .
+RUN go build -o main services/grpc/server/server.go
+#CMD ["./main"]

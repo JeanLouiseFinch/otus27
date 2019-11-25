@@ -1,0 +1,47 @@
+version: "3"
+services:
+  postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile.DB
+    ports:
+      - 7676:5432
+  rabbit:
+    build:
+      context: .
+      dockerfile: Dockerfile.RMQ
+    ports:
+      - 5671:5672
+  grpc:
+    build:
+      context: .
+      dockerfile: Dockerfile.GRPC
+    env_file:
+      - my.env
+    network_mode: host
+    command: ./main
+    depends_on:
+      - postgres
+  notifysend:
+    build:
+      context: .
+      dockerfile: Dockerfile.NotifySend
+    env_file:
+      - my.env
+    network_mode: host
+    command: ./main
+    depends_on:
+      - grpc
+      - rabbit
+  notifyrecive:
+    build:
+      context: .
+      dockerfile: Dockerfile.NotifyRecive
+    env_file:
+      - my.env
+    network_mode: host
+    command: ./main
+    depends_on:
+      - notifysend
+      - grpc
+      - rabbit

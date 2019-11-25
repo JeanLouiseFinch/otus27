@@ -1,0 +1,3 @@
+FROM rabbitmq:latest
+LABEL maintainer="Sergey A"
+WORKDIR /rabbitmq
