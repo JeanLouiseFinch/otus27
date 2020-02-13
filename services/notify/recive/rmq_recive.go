@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/JeanLouiseFinch/otus27/api/config"
 	"github.com/JeanLouiseFinch/otus27/api/log"
@@ -13,8 +14,9 @@ import (
 
 func main() {
 	var (
-		cfg *config.Config
-		err error
+		cfg  *config.Config
+		err  error
+		conn *amqp.Connection
 	)
 	if len(os.Args) > 1 {
 		cfg, err = config.GetConfig(os.Args[1])
@@ -29,8 +31,18 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	errCount := 0
+	for {
+		if errCount == 5 {
+			break
+		}
+		conn, err = amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s/", cfg.RMQ.UserRMQ, cfg.RMQ.PasswordRMQ, cfg.RMQ.HostRMQ, cfg.RMQ.PortRMQ))
+		if err == nil {
+			break
+		}
+		time.Sleep(5 * time.Second)
+	}
 
-	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s/", cfg.RMQ.UserRMQ, cfg.RMQ.PasswordRMQ, cfg.RMQ.HostRMQ, cfg.RMQ.PortRMQ))
 	if err != nil {
 		l.Fatal("Failed to connect to RabbitMQ", zap.Error(err))
 	}

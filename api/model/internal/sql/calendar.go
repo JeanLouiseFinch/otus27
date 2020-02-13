@@ -65,7 +65,7 @@ func GetEvent(ctx context.Context, db *sqlx.DB, id string) (*Event, error) {
 
 func ModifyEvent(ctx context.Context, db *sqlx.DB, id string, title, description string, start, end time.Time) (*Event, error) {
 	result := &Event{}
-	err := db.QueryRowContext(ctx, "UPDATE events SET title=$1,descr=$2,start_time=$3,end_time=$4 WHERE id=$5 RETURNING title,descr,start_time,end_time", title, description, start, end, id).Scan(result.Title, result.Description, result.Start, result.End)
+	err := db.QueryRowContext(ctx, "UPDATE events SET title=$1,descr=$2,start_time=$3,end_time=$4 WHERE id=$5 RETURNING title,descr,start_time,end_time", title, description, start, end, id).Scan(&result.Title, &result.Description, &result.Start, &result.End)
 	return result, err
 }
 func RemoveEvent(ctx context.Context, db *sqlx.DB, id string) error {

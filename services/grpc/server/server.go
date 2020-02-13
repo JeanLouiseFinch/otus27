@@ -3,6 +3,7 @@ package main
 import (
 	"net"
 	"os"
+	"time"
 
 	"github.com/JeanLouiseFinch/otus27/api/model"
 
@@ -32,6 +33,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	time.Sleep(1 * time.Minute)
 	l.Info("Running...")
 	lis, err := net.Listen("tcp", "0.0.0.0:50051")
 	if err != nil {
