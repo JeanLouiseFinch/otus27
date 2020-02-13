@@ -30,7 +30,22 @@ func panicOnErr(err error) {
 	}
 }
 func (net *newEventTest) start(interface{}) {
-	cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+	var cc *grpc.ClientConn
+	var err error
+	countErr := 0
+	for {
+		cc, err = grpc.Dial("localhost:50051", grpc.WithInsecure())
+		if err != nil {
+			countErr++
+			if countErr < 5 {
+				time.Sleep(10 * time.Second)
+			} else {
+				break
+			}
+		} else {
+			break
+		}
+	}
 	panicOnErr(err)
 	net.clientConn = cc
 	net.calendar = proto.NewCalendarServiceClient(cc)
@@ -70,32 +85,6 @@ func (net *newEventTest) theErrorShouldBeNil() error {
 	}
 	return nil
 }
-func (net *newEventTest) iSendISendANewHeader(arg1, arg2, arg3, arg4 string) error {
-	event := proto.Event{}
-	event.Title = arg1
-	event.Description = arg2
-	shortForm := "2006-Jan-02"
-	start, _ := time.Parse(shortForm, arg3)
-	start2, err := ptypes.TimestampProto(start)
-	if err != nil {
-		return err
-	}
-	event.Start = start2
-	end, _ := time.Parse(shortForm, arg4)
-	end2, err := ptypes.TimestampProto(end)
-	if err != nil {
-		return err
-	}
-	event.End = end2
-	ctx, cancel := context.WithTimeout(context.Background(), 400*time.Millisecond)
-	defer cancel()
-	_, err = net.calendar.ModifyEvent(ctx, &proto.ModifyEventRequest{
-		Id:    net.returnMessage.GetId(),
-		Event: &event,
-	})
-	net.returnError = err
-	return nil
-}
 
 func (net *newEventTest) iSendTheEventId() error {
 	time.Sleep(5 * time.Second)
@@ -112,8 +101,6 @@ func FeatureContext(s *godog.Suite) {
 	net := new(newEventTest)
 	s.BeforeScenario(net.start)
 	s.Step(`^I send a new event with "([^"]*)", "([^"]*)", "([^"]*)", "([^"]*)"$`, net.iSendANewEventWith)
-	s.Step(`^the error should be nil$`, net.theErrorShouldBeNil)
-	s.Step(`^I send I send a new header "([^"]*)", "([^"]*)", "([^"]*)", "([^"]*)"$`, net.iSendISendANewHeader)
 	s.Step(`^the error should be nil$`, net.theErrorShouldBeNil)
 	s.Step(`^I send the event id$`, net.iSendTheEventId)
 	s.Step(`^the error should be nil$`, net.theErrorShouldBeNil)

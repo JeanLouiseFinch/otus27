@@ -1,0 +1,12 @@
+FROM golang:stretch
+LABEL maintainer="Sergey A"
+
+RUN mkdir -p /opt/integration_tests
+WORKDIR /opt/integration_tests
+
+COPY integration_test/go.mod ./
+COPY integration_test/go.sum ./
+RUN go mod download
+
+COPY . .
+CMD ["go", "test"]

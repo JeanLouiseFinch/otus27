@@ -1,17 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/cucumber/godog"
 )
 
 func TestMain(m *testing.M) {
-	fmt.Println("Wait 1s for service availability...")
-	time.Sleep(1 * time.Second)
 
 	status := godog.RunWithOptions("integration", func(s *godog.Suite) {
 		FeatureContext(s)

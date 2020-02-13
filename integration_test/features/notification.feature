@@ -7,10 +7,6 @@ Feature: Sending messages to the grpc service
 		When I send a new event with "myevent", "description", "2020-Feb-22", "2020-Feb-23"
 		Then the error should be nil
 
-	Scenario: updating the received event
-			When I send I send a new header "edittitleevent", "description", "2020-Feb-22", "2020-Feb-23"
-			Then the error should be nil
-
 	Scenario: deleting the received event
 			When I send the event id
 			Then the error should be nil
