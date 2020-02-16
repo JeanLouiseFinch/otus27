@@ -3,12 +3,13 @@ package main
 import (
 	"os"
 	"testing"
+	"time"
 
 	"github.com/cucumber/godog"
 )
 
 func TestMain(m *testing.M) {
-
+	<-time.After(1 * time.Minute)
 	status := godog.RunWithOptions("integration", func(s *godog.Suite) {
 		FeatureContext(s)
 	}, godog.Options{

@@ -1,14 +1,5 @@
 version: "3"
 services:
-  integration_tests:
-    build:
-      context: .
-      dockerfile: Dockerfile.TEST
-    env_file:
-      - my.env
-    network_mode: host
-    depends_on:
-      - grpc
   postgres:
     build:
       context: .
@@ -54,3 +45,12 @@ services:
       - notifysend
       - grpc
       - rabbit
+  integration_tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.TEST
+    env_file:
+      - my.env
+    network_mode: host
+    depends_on:
+      - grpc
