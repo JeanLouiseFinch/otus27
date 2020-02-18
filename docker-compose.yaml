@@ -1,0 +1,133 @@
+version: '3'
+services:
+
+  db:
+    image: postgres:11.2
+    environment:
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_USER: calendar
+      POSTGRES_DB: calendar
+    #network_mode: host
+    ports:
+      - "5432:5432"
+    networks:
+      - net
+
+  migrations:
+    image: migrate/migrate
+    # network_mode: host
+    volumes:
+      - ./calendar/migrations:/migrations
+    command: -path /migrations/ -database postgres://calendar:123456@db:5432/calendar?sslmode=disable up
+    depends_on:
+      - db
+    networks:
+      - net
+    restart: on-failure
+
+  queue:
+    image: rabbitmq:3.7.17
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: 123456
+    ports:
+      - "5672:5672"
+    networks:
+      - net
+    restart: on-failure
+
+  sender:
+    build: ./calendar
+    command: ./main sender
+    volumes:
+      - ./calendar:/code
+    environment:
+      PGHOST: db
+      RQHost: queue
+    depends_on:
+      - db
+      - queue
+      - migrations
+    networks:
+      - net
+    restart: on-failure
+
+  scheduler:
+    build: ./calendar
+    command: ./main scheduler
+    volumes:
+      - ./calendar:/code
+    environment:
+      PGHOST: db
+      RQHost: queue
+    depends_on:
+      - queue
+      - migrations
+      - sender
+      - db
+    networks:
+      - net
+    restart: on-failure
+
+  prom:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command: --config.file=/etc/prometheus/prometheus.yml
+    networks:
+      - net
+    #network_mode: "host"
+
+  rest:
+    build: ./calendar
+    command: ./main web
+    volumes:
+      - ./calendar:/code
+    depends_on:
+      - calendar.ru
+      - db
+    networks:
+      - net
+    restart: on-failure
+    environment:
+      GRPC_PORT: 50051
+      GRPC_HOST: calendar.ru
+    ports:
+      - "8080:8080"
+
+  calendar.ru:
+    build: ./calendar
+    container_name: calendar
+    environment:
+      GRPC_PORT: 50051
+      GRPC_HOST: 0.0.0.0
+      APP_BUILD: dev
+      PGPASSWORD: 123456
+      PGUSER: calendar
+      PGDATABASE: calendar
+      PGPORT: 5432
+      PGHOST: db
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: 123456
+    command: ./main server
+    #network_mode: host
+    volumes:
+      - ./calendar:/code
+    ports:
+      - "50051:50051"
+    depends_on:
+      - db
+      - migrations
+    restart: on-failure
+    networks:
+      - net
+
+volumes:
+  tmp:
+
+networks:
+  net:
+    driver: bridge

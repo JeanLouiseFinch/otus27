@@ -1,4 +1,0 @@
-FROM postgres:latest
-LABEL maintainer="Sergey A"
-WORKDIR /postgres
-COPY api/model/shemadb/db.sql /docker-entrypoint-initdb.d/

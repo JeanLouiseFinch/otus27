@@ -1,8 +1,0 @@
-FROM golang:stretch
-LABEL maintainer="Sergey A"
-WORKDIR /app
-COPY services/notify/send/go.mod services/notify/send/go.sum ./
-RUN go mod download
-COPY . .
-RUN go build -o main services/notify/send/rmq_send.go
-#CMD ["./main"]

@@ -1,8 +1,0 @@
-FROM golang:stretch
-LABEL maintainer="Sergey A"
-WORKDIR /app
-COPY integration_test/go.mod integration_test/go.sum ./
-RUN go mod download
-COPY . .
-CMD ["go", "test","integration_test/main_test.go","integration_test/send_test.go"]
-#RUN go build -o main services/grpc/server/server.go
